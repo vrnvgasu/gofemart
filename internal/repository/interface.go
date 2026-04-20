@@ -6,7 +6,7 @@ import (
 	"github.com/vrnvgasu/gofemart/internal/model"
 )
 
-//go:generate mockgen -destination=./mocks/mock.go . Storage
+//go:generate mockgen -destination=./mocks/mock.go -package=mocks . Storage
 type Storage interface {
 	CreateUser(ctx context.Context, login, passwordHash string) (*model.User, error)
 	GetUserByLogin(ctx context.Context, login string) (*model.User, error)

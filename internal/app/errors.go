@@ -8,7 +8,6 @@ import (
 type ServiceErrorType string
 
 const (
-	ErrNotFound            ServiceErrorType = "not found"
 	ErrInternal            ServiceErrorType = "internal server error"
 	ErrUnprocessableEntity ServiceErrorType = "unprocessable entity"
 	ErrBadRequest          ServiceErrorType = "bad request"
@@ -44,14 +43,6 @@ func PaymentRequiredError() error {
 	}
 }
 
-func NotFoundError() error {
-	return &ServiceError{
-		Type:     ErrNotFound,
-		Message:  http.StatusText(http.StatusNotFound),
-		HTTPCode: http.StatusNotFound,
-	}
-}
-
 func NoContentError() error {
 	return &ServiceError{
 		Type:     ErrNoContent,
@@ -81,13 +72,5 @@ func BadRequestError() error {
 		Type:     ErrBadRequest,
 		Message:  http.StatusText(http.StatusBadRequest),
 		HTTPCode: http.StatusBadRequest,
-	}
-}
-
-func InternalError() error {
-	return &ServiceError{
-		Type:     ErrInternal,
-		Message:  http.StatusText(http.StatusInternalServerError),
-		HTTPCode: http.StatusInternalServerError,
 	}
 }

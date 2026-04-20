@@ -8,10 +8,9 @@ import (
 )
 
 var (
-	ErrLoginConflict       = errors.New("login already taken")
-	ErrOrderAlreadyExists  = errors.New("order already submitted by this user")
-	ErrOrderConflict       = errors.New("order submitted by another user")
-	ErrInsufficientBalance = errors.New("insufficient balance")
+	ErrLoginConflict      = errors.New("login already taken")
+	ErrOrderAlreadyExists = errors.New("order already submitted by this user")
+	ErrOrderConflict      = errors.New("order submitted by another user")
 )
 
 type pgErrorClassification int

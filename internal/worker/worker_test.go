@@ -1,11 +1,14 @@
 package worker
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
+	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 
 	"github.com/vrnvgasu/gofemart/internal/accrual"
@@ -100,5 +103,61 @@ func TestWorker_UpdatesProcessedOrder(t *testing.T) {
 			}
 			w.poll(t.Context())
 		})
+	}
+}
+
+func TestNew(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	storage := mockrepository.NewMockStorage(ctrl)
+	client := accrual.NewClient("http://localhost")
+
+	w := New(storage, client)
+
+	assert.NotNil(t, w)
+	assert.Equal(t, defaultPollInterval, w.pollInterval)
+}
+
+func TestWithPollInterval(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	storage := mockrepository.NewMockStorage(ctrl)
+	w := New(storage, accrual.NewClient("http://localhost"))
+
+	result := w.WithPollInterval(5 * time.Second)
+
+	assert.Equal(t, 5*time.Second, w.pollInterval)
+	assert.Equal(t, w, result)
+}
+
+func TestRun_StopsOnContextCancel(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	storage := mockrepository.NewMockStorage(ctrl)
+	w := New(storage, accrual.NewClient("http://localhost")).
+		WithPollInterval(10 * time.Second)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	done := make(chan struct{})
+	go func() {
+		w.Run(ctx)
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("Run did not stop after context cancellation")
 	}
 }

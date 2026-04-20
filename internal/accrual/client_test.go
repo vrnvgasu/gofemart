@@ -121,6 +121,13 @@ func TestGetOrder(t *testing.T) {
 	}
 }
 
+func TestErrTooManyRequests_Error(t *testing.T) {
+	t.Parallel()
+
+	err := &accrual.ErrTooManyRequests{RetryAfter: 30 * time.Second}
+	assert.Contains(t, err.Error(), "30s")
+}
+
 func TestGetOrder_TooManyRequests(t *testing.T) {
 	t.Parallel()
 	url := "/api/orders/12345678903"

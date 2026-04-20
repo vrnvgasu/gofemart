@@ -19,7 +19,7 @@ test:
 .PHONY: cover
 cover:
 	@echo "coverage"
-	@go test -coverprofile=coverage.out ./...
+	@go test -coverprofile=coverage.out -coverpkg=./... $(shell go list ./... | grep -v "internal/repository/mocks")
 	@go tool cover -func=coverage.out | grep "^total:"
 
 .PHONY: generate
