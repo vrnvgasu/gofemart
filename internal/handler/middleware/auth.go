@@ -1,3 +1,4 @@
+// Package middleware содержит gin-middleware для HTTP-обработчиков.
 package middleware
 
 import (
@@ -11,6 +12,9 @@ import (
 
 const userIDKey = "userID"
 
+// Auth возвращает middleware для проверки JWT-токена.
+// Токен читается из заголовка Authorization (Bearer) или cookie "token".
+// Если токен отсутствует или недействителен, возвращает 401.
 func Auth(jwtSecret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenStr := ""
@@ -39,7 +43,8 @@ func Auth(jwtSecret string) gin.HandlerFunc {
 	}
 }
 
-// UserIDFromCtx returns 0 if not present.
+// UserIDFromCtx возвращает ID пользователя из контекста gin.
+// Возвращает 0, если ID не найден.
 func UserIDFromCtx(c *gin.Context) int64 {
 	v, _ := c.Get(userIDKey)
 	id, _ := v.(int64)

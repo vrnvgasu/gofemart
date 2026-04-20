@@ -11,6 +11,8 @@ import (
 	"github.com/vrnvgasu/gofemart/pkg/jwt"
 )
 
+// Login проверяет логин и пароль пользователя и возвращает JWT-токен.
+// Возвращает UnauthorizedError, если пользователь не найден или пароль неверный.
 func (a *App) Login(ctx context.Context, login, password string) (string, error) {
 	user, err := a.storage.GetUserByLogin(ctx, login)
 	if err != nil {
@@ -32,6 +34,8 @@ func (a *App) Login(ctx context.Context, login, password string) (string, error)
 	return token, nil
 }
 
+// Register регистрирует нового пользователя и возвращает JWT-токен.
+// Возвращает ConflictError, если логин уже занят.
 func (a *App) Register(ctx context.Context, login, password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {

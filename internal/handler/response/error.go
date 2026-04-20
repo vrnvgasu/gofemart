@@ -1,3 +1,4 @@
+// Package response содержит вспомогательные структуры и функции для формирования HTTP-ответов.
 package response
 
 import (
@@ -10,12 +11,16 @@ import (
 	"github.com/vrnvgasu/gofemart/internal/logger"
 )
 
+// Error — структура для передачи информации об ошибке в JSON-ответе.
 type Error struct {
 	Code        string `json:"code"`
 	HTTPCode    int    `json:"http_code"`
 	UserMessage string `json:"user_message"`
 }
 
+// ResponseError записывает ошибку в контекст gin и отправляет соответствующий HTTP-ответ.
+// Если ошибка является ServiceError, используется ее HTTP-код.
+// В остальных случаях возвращается 500.
 func ResponseError(c *gin.Context, err error) {
 	if err != nil {
 		_ = c.Error(err)

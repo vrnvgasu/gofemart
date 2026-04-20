@@ -1,3 +1,4 @@
+// Package accrual предоставляет клиент для взаимодействия с внешней системой расчета начислений.
 package accrual
 
 import (
@@ -8,34 +9,45 @@ import (
 	"time"
 )
 
+// OrderStatus представляет статус обработки заказа в системе начислений.
 type OrderStatus string
 
 const (
+	// StatusRegistered — заказ зарегистрирован, но вознаграждение еще не рассчитано.
 	StatusRegistered OrderStatus = "REGISTERED"
-	StatusInvalid    OrderStatus = "INVALID"
+	// StatusInvalid — заказ не принят к расчету.
+	StatusInvalid OrderStatus = "INVALID"
+	// StatusProcessing — расчет начисления в процессе.
 	StatusProcessing OrderStatus = "PROCESSING"
-	StatusProcessed  OrderStatus = "PROCESSED"
+	// StatusProcessed — расчет начисления завершен.
+	StatusProcessed OrderStatus = "PROCESSED"
 )
 
+// OrderInfo содержит информацию о заказе из системы начислений.
 type OrderInfo struct {
 	Order   string      `json:"order"`
 	Status  OrderStatus `json:"status"`
 	Accrual *float64    `json:"accrual,omitempty"`
 }
 
+// ErrTooManyRequests возвращается, когда превышен лимит запросов к системе начислений.
 type ErrTooManyRequests struct {
+	// RetryAfter — через сколько нужно повторить запрос.
 	RetryAfter time.Duration
 }
 
+// Error возвращает текст ошибки с указанием времени ожидания.
 func (e *ErrTooManyRequests) Error() string {
 	return fmt.Sprintf("accrual: too many requests, retry after %s", e.RetryAfter)
 }
 
+// Client — HTTP-клиент для системы начислений.
 type Client struct {
 	baseURL    string
 	httpClient *http.Client
 }
 
+// NewClient создает новый Client с указанным базовым URL.
 func NewClient(baseURL string) *Client {
 	return &Client{
 		baseURL:    baseURL,
@@ -43,6 +55,9 @@ func NewClient(baseURL string) *Client {
 	}
 }
 
+// GetOrder запрашивает информацию о заказе из системы начислений.
+// Возвращает nil, если заказ не найден (204).
+// Возвращает ErrTooManyRequests при превышении лимита запросов (429).
 func (c *Client) GetOrder(ctx context.Context, number string) (*OrderInfo, error) {
 	url := fmt.Sprintf("%s/api/orders/%s", c.baseURL, number)
 

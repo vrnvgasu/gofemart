@@ -28,10 +28,11 @@ func (h *Handler) UploadOrder(c *gin.Context) {
 	if isCreated {
 		c.Status(http.StatusAccepted)
 		return
-	} else {
-		c.Status(http.StatusOK)
-		return
 	}
+
+	c.Status(http.StatusOK)
+	return
+
 }
 
 // GetOrders handles GET /api/user/orders.

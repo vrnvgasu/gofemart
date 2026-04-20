@@ -1,3 +1,4 @@
+// Package worker содержит фоновый воркер для обработки заказов.
 package worker
 
 import (
@@ -13,12 +14,14 @@ import (
 
 const defaultPollInterval = 2 * time.Second
 
+// Worker периодически запрашивает статусы заказов из системы начислений и обновляет их в базе.
 type Worker struct {
 	storage       repository.Storage
 	accrualClient *accrual.Client
 	pollInterval  time.Duration
 }
 
+// New создает новый Worker с дефолтным интервалом опроса.
 func New(storage repository.Storage, accrualClient *accrual.Client) *Worker {
 	return &Worker{
 		storage:       storage,
@@ -27,11 +30,13 @@ func New(storage repository.Storage, accrualClient *accrual.Client) *Worker {
 	}
 }
 
+// WithPollInterval устанавливает интервал опроса системы начислений.
 func (w *Worker) WithPollInterval(d time.Duration) *Worker {
 	w.pollInterval = d
 	return w
 }
 
+// Run запускает воркер и блокирует выполнение до отмены контекста.
 func (w *Worker) Run(ctx context.Context) {
 	ticker := time.NewTicker(w.pollInterval)
 	defer ticker.Stop()

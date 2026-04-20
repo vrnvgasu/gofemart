@@ -7,6 +7,7 @@ import (
 	"github.com/vrnvgasu/gofemart/internal/handler/middleware"
 )
 
+// NewRouter создает и настраивает gin-роутер со всеми маршрутами и middleware.
 func NewRouter(h *Handler, cnf *config.Config) *gin.Engine {
 	r := gin.New()
 	r.Use(middleware.Logger())

@@ -56,6 +56,9 @@ func (c *compressReader) Close() error {
 	return c.zr.Close()
 }
 
+// Gzip возвращает middleware для поддержки gzip-сжатия.
+// Сжимает ответ, если клиент поддерживает gzip (Accept-Encoding: gzip).
+// Распаковывает тело запроса, если оно сжато (Content-Encoding: gzip).
 func Gzip() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if strings.Contains(c.Request.Header.Get("Accept-Encoding"), gzipHeader) {

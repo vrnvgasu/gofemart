@@ -8,9 +8,12 @@ import (
 )
 
 var (
-	ErrLoginConflict      = errors.New("login already taken")
+	// ErrLoginConflict возвращается, когда логин уже занят другим пользователем.
+	ErrLoginConflict = errors.New("login already taken")
+	// ErrOrderAlreadyExists возвращается, когда заказ уже загружен этим же пользователем.
 	ErrOrderAlreadyExists = errors.New("order already submitted by this user")
-	ErrOrderConflict      = errors.New("order submitted by another user")
+	// ErrOrderConflict возвращается, когда заказ уже загружен другим пользователем.
+	ErrOrderConflict = errors.New("order submitted by another user")
 )
 
 type pgErrorClassification int

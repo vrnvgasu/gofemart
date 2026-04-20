@@ -1,3 +1,4 @@
+// Package jwt предоставляет функции для генерации и парсинга JWT-токенов.
 package jwt
 
 import (
@@ -9,11 +10,15 @@ import (
 
 const tokenDuration = 24 * time.Hour
 
+// Claims содержит данные, которые хранятся внутри JWT-токена.
 type Claims struct {
+	// UserID — идентификатор пользователя.
 	UserID int64 `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
+// Generate создает JWT-токен для указанного пользователя.
+// Токен подписывается секретом и действует 24 часа.
 func Generate(userID int64, secret string) (string, error) {
 	claims := Claims{
 		UserID: userID,
@@ -32,6 +37,8 @@ func Generate(userID int64, secret string) (string, error) {
 	return signed, nil
 }
 
+// Parse разбирает JWT-токен и возвращает ID пользователя.
+// Возвращает ошибку, если токен недействителен или подпись не совпадает.
 func Parse(tokenStr, secret string) (int64, error) {
 	claims := &Claims{}
 

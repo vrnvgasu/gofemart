@@ -1,3 +1,4 @@
+// Package retry предоставляет утилиты для повторного выполнения операций при ошибках.
 package retry
 
 import (
@@ -5,12 +6,17 @@ import (
 	"time"
 )
 
+// Config содержит настройки для повторных попыток.
 type Config struct {
-	MaxRetries         int
+	// MaxRetries — максимальное количество повторных попыток.
+	MaxRetries int
+	// StartRetryInterval — начальный интервал между попытками.
 	StartRetryInterval time.Duration
-	AddRetryPeriod     time.Duration
+	// AddRetryPeriod — на сколько увеличивается интервал с каждой попыткой.
+	AddRetryPeriod time.Duration
 }
 
+// DefaultConfig возвращает конфигурацию с разумными дефолтными значениями.
 func DefaultConfig() *Config {
 	return &Config{
 		MaxRetries:         3,
@@ -19,22 +25,29 @@ func DefaultConfig() *Config {
 	}
 }
 
+// RetryableError оборачивает ошибку и сигнализирует, что операцию можно повторить.
 type RetryableError struct {
 	Err error
 }
 
+// NewRetryableError создает новую RetryableError, оборачивая переданную ошибку.
 func NewRetryableError(err error) error {
 	return &RetryableError{Err: err}
 }
 
+// Error возвращает текст ошибки.
 func (e *RetryableError) Error() string {
 	return e.Err.Error()
 }
 
+// Unwrap возвращает оригинальную ошибку.
 func (e *RetryableError) Unwrap() error {
 	return e.Err
 }
 
+// RetryWithSettings выполняет функцию f с повторными попытками согласно конфигурации cnf.
+// Если cnf равен nil, используется DefaultConfig.
+// Повтор происходит только если функция вернула RetryableError.
 func RetryWithSettings(f func() error, cnf *Config) error {
 	if cnf == nil {
 		cnf = DefaultConfig()
@@ -63,6 +76,7 @@ func RetryWithSettings(f func() error, cnf *Config) error {
 	}
 }
 
+// Retry выполняет функцию f с повторными попытками, используя DefaultConfig.
 func Retry(f func() error) error {
 	return RetryWithSettings(f, DefaultConfig())
 }

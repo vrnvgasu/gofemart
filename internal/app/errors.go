@@ -1,3 +1,4 @@
+// Package app содержит бизнес-логику приложения.
 package app
 
 import (
@@ -5,28 +6,39 @@ import (
 	"net/http"
 )
 
+// ServiceErrorType — тип ошибки сервисного слоя.
 type ServiceErrorType string
 
 const (
-	ErrInternal            ServiceErrorType = "internal server error"
+	// ErrInternal — внутренняя ошибка сервера.
+	ErrInternal ServiceErrorType = "internal server error"
+	// ErrUnprocessableEntity — переданные данные не прошли валидацию.
 	ErrUnprocessableEntity ServiceErrorType = "unprocessable entity"
-	ErrBadRequest          ServiceErrorType = "bad request"
-	ErrUnauthorized        ServiceErrorType = "unauthorized"
-	ErrConflict            ServiceErrorType = "conflict"
-	ErrNoContent           ServiceErrorType = "no content"
-	ErrPaymentRequired     ServiceErrorType = "payment required"
+	// ErrBadRequest — некорректный запрос.
+	ErrBadRequest ServiceErrorType = "bad request"
+	// ErrUnauthorized — пользователь не авторизован.
+	ErrUnauthorized ServiceErrorType = "unauthorized"
+	// ErrConflict — конфликт данных, например дублирование.
+	ErrConflict ServiceErrorType = "conflict"
+	// ErrNoContent — данные отсутствуют.
+	ErrNoContent ServiceErrorType = "no content"
+	// ErrPaymentRequired — недостаточно средств на счете.
+	ErrPaymentRequired ServiceErrorType = "payment required"
 )
 
+// ServiceError — ошибка сервисного слоя с HTTP-кодом.
 type ServiceError struct {
 	Type     ServiceErrorType
 	Message  string
 	HTTPCode int
 }
 
+// Error возвращает строковое представление ошибки.
 func (s *ServiceError) Error() string {
 	return fmt.Sprintf("[%s]: %s", s.Type, s.Message)
 }
 
+// UnauthorizedError возвращает ошибку 401 Unauthorized.
 func UnauthorizedError() error {
 	return &ServiceError{
 		Type:     ErrUnauthorized,
@@ -35,6 +47,7 @@ func UnauthorizedError() error {
 	}
 }
 
+// PaymentRequiredError возвращает ошибку 402 Payment Required.
 func PaymentRequiredError() error {
 	return &ServiceError{
 		Type:     ErrPaymentRequired,
@@ -43,6 +56,7 @@ func PaymentRequiredError() error {
 	}
 }
 
+// NoContentError возвращает ошибку 204 No Content.
 func NoContentError() error {
 	return &ServiceError{
 		Type:     ErrNoContent,
@@ -51,6 +65,7 @@ func NoContentError() error {
 	}
 }
 
+// ConflictError возвращает ошибку 409 Conflict.
 func ConflictError() error {
 	return &ServiceError{
 		Type:     ErrConflict,
@@ -59,6 +74,7 @@ func ConflictError() error {
 	}
 }
 
+// UnprocessableEntityError возвращает ошибку 422 Unprocessable Entity.
 func UnprocessableEntityError() error {
 	return &ServiceError{
 		Type:     ErrUnprocessableEntity,
@@ -67,6 +83,7 @@ func UnprocessableEntityError() error {
 	}
 }
 
+// BadRequestError возвращает ошибку 400 Bad Request.
 func BadRequestError() error {
 	return &ServiceError{
 		Type:     ErrBadRequest,

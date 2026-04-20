@@ -10,6 +10,7 @@ import (
 	"github.com/vrnvgasu/gofemart/pkg/luhn"
 )
 
+// OrderResponse содержит данные о заказе для возврата в HTTP-ответе.
 type OrderResponse struct {
 	Number     string   `json:"number"`
 	Status     string   `json:"status"`
@@ -17,6 +18,9 @@ type OrderResponse struct {
 	UploadedAt string   `json:"uploaded_at"`
 }
 
+// CreateOrder принимает новый заказ от пользователя.
+// Возвращает true, если заказ новый, false — если уже был загружен этим пользователем.
+// Возвращает ConflictError, если номер уже загружен другим пользователем.
 func (a *App) CreateOrder(ctx context.Context, userID int64, number string) (bool, error) {
 	if !luhn.Valid(number) {
 		return false, UnprocessableEntityError()
@@ -37,6 +41,8 @@ func (a *App) CreateOrder(ctx context.Context, userID int64, number string) (boo
 	return true, nil
 }
 
+// GetUserOrders возвращает список заказов пользователя.
+// Возвращает NoContentError, если заказов нет.
 func (a *App) GetUserOrders(ctx context.Context, userID int64) ([]OrderResponse, error) {
 	orders, err := a.storage.GetUserOrders(ctx, userID)
 	if err != nil {

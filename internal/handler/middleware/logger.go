@@ -8,6 +8,8 @@ import (
 	"github.com/vrnvgasu/gofemart/internal/logger"
 )
 
+// Logger возвращает middleware для логирования HTTP-запросов.
+// Логирует метод, URI, статус ответа, размер и время выполнения.
 func Logger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()

@@ -8,12 +8,16 @@ import (
 	"github.com/vrnvgasu/gofemart/pkg/luhn"
 )
 
+// WithdrawalResponse содержит данные о списании для HTTP-ответа.
 type WithdrawalResponse struct {
 	Order       string  `json:"order"`
 	Sum         float64 `json:"sum"`
 	ProcessedAt string  `json:"processed_at"`
 }
 
+// CreateWithdrawal списывает баллы со счета пользователя в счет оплаты заказа.
+// Возвращает PaymentRequiredError, если на счете недостаточно средств.
+// Возвращает UnprocessableEntityError, если номер заказа не прошел проверку Луна.
 func (a *App) CreateWithdrawal(ctx context.Context, userID int64, order string, sum float64) error {
 	if !luhn.Valid(order) {
 		return UnprocessableEntityError()
@@ -42,6 +46,8 @@ func (a *App) CreateWithdrawal(ctx context.Context, userID int64, order string, 
 	return nil
 }
 
+// GetWithdrawals возвращает список всех списаний пользователя.
+// Возвращает NoContentError, если списаний не было.
 func (a *App) GetWithdrawals(ctx context.Context, userID int64) ([]WithdrawalResponse, error) {
 	withdrawals, err := a.storage.GetUserWithdrawals(ctx, userID)
 	if err != nil {
