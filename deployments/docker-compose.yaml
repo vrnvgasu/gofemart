@@ -1,0 +1,30 @@
+version: '3.8'
+name: 'gophermart'
+
+services:
+  postgres:
+    container_name: db_gophermart
+    image: postgres:16.7
+    environment:
+      POSTGRES_DB: "gophermart"
+      POSTGRES_USER: "gophermart"
+      POSTGRES_PASSWORD: "gophermart"
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    volumes:
+      - ./../data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready' ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    networks: &networks
+      - gophermart-network
+
+networks:
+  gophermart-network:
+    driver: bridge
+
+volumes:
+  gophermart_pgdata:
