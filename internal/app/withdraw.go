@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"iter"
 	"time"
 
 	"github.com/vrnvgasu/gofemart/pkg/luhn"
@@ -33,7 +34,7 @@ func (a *App) CreateWithdrawal(ctx context.Context, userID int64, order string, 
 			return PaymentRequiredError()
 		}
 
-		if err = a.storage.CreateWithdrawal(ctx, userID, order, sum); err != nil {
+		if err = a.storage.CreateWithdrawal(txCtx, userID, order, sum); err != nil {
 			return fmt.Errorf("app.CreateWithdrawal CreateWithdrawal: %w", err)
 		}
 
@@ -46,9 +47,9 @@ func (a *App) CreateWithdrawal(ctx context.Context, userID int64, order string, 
 	return nil
 }
 
-// GetWithdrawals возвращает список всех списаний пользователя.
+// GetWithdrawals возвращает итератор по всем списаниям пользователя.
 // Возвращает NoContentError, если списаний не было.
-func (a *App) GetWithdrawals(ctx context.Context, userID int64) ([]WithdrawalResponse, error) {
+func (a *App) GetWithdrawals(ctx context.Context, userID int64) (iter.Seq[WithdrawalResponse], error) {
 	withdrawals, err := a.storage.GetUserWithdrawals(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("app.GetWithdrawals: %w", err)
@@ -58,14 +59,15 @@ func (a *App) GetWithdrawals(ctx context.Context, userID int64) ([]WithdrawalRes
 		return nil, NoContentError()
 	}
 
-	resp := make([]WithdrawalResponse, 0, len(withdrawals))
-	for _, w := range withdrawals {
-		resp = append(resp, WithdrawalResponse{
-			Order:       w.OrderNumber,
-			Sum:         w.Sum,
-			ProcessedAt: w.ProcessedAt.Format(time.RFC3339),
-		})
-	}
-
-	return resp, nil
+	return func(yield func(WithdrawalResponse) bool) {
+		for _, w := range withdrawals {
+			if !yield(WithdrawalResponse{
+				Order:       w.OrderNumber,
+				Sum:         w.Sum,
+				ProcessedAt: w.ProcessedAt.Format(time.RFC3339),
+			}) {
+				return
+			}
+		}
+	}, nil
 }

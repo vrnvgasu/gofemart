@@ -3,6 +3,7 @@ package handler
 import (
 	"io"
 	"net/http"
+	"slices"
 
 	"github.com/gin-gonic/gin"
 
@@ -39,11 +40,11 @@ func (h *Handler) UploadOrder(c *gin.Context) {
 func (h *Handler) GetOrders(c *gin.Context) {
 	userID := middleware.UserIDFromCtx(c)
 
-	resp, err := h.app.GetUserOrders(c.Request.Context(), userID)
+	seq, err := h.app.GetUserOrders(c.Request.Context(), userID)
 	if err != nil {
 		response.ResponseError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, slices.Collect(seq))
 }

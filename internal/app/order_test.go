@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"slices"
 	"testing"
 	"time"
 
@@ -154,9 +155,13 @@ func TestGetUserOrders(t *testing.T) {
 			a := App{
 				storage: tt.storage(mockrepository.NewMockStorage(ctrl)),
 			}
-			res, err := a.GetUserOrders(t.Context(), 1)
+			seq, err := a.GetUserOrders(t.Context(), 1)
 			tt.expectedErr(t, err)
-			require.Equal(t, tt.expected, res)
+			var got []OrderResponse
+			if seq != nil {
+				got = slices.Collect(seq)
+			}
+			require.Equal(t, tt.expected, got)
 		})
 	}
 }

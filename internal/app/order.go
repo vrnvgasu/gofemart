@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"iter"
 	"time"
 
 	"github.com/vrnvgasu/gofemart/internal/repository/postgres"
@@ -41,9 +42,9 @@ func (a *App) CreateOrder(ctx context.Context, userID int64, number string) (boo
 	return true, nil
 }
 
-// GetUserOrders возвращает список заказов пользователя.
+// GetUserOrders возвращает итератор по заказам пользователя.
 // Возвращает NoContentError, если заказов нет.
-func (a *App) GetUserOrders(ctx context.Context, userID int64) ([]OrderResponse, error) {
+func (a *App) GetUserOrders(ctx context.Context, userID int64) (iter.Seq[OrderResponse], error) {
 	orders, err := a.storage.GetUserOrders(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("app.GetUserOrders: %w", err)
@@ -53,15 +54,16 @@ func (a *App) GetUserOrders(ctx context.Context, userID int64) ([]OrderResponse,
 		return nil, NoContentError()
 	}
 
-	resp := make([]OrderResponse, 0, len(orders))
-	for _, o := range orders {
-		resp = append(resp, OrderResponse{
-			Number:     o.Number,
-			Status:     string(o.Status),
-			Accrual:    o.Accrual,
-			UploadedAt: o.UploadedAt.Format(time.RFC3339),
-		})
-	}
-
-	return resp, nil
+	return func(yield func(OrderResponse) bool) {
+		for _, o := range orders {
+			if !yield(OrderResponse{
+				Number:     o.Number,
+				Status:     string(o.Status),
+				Accrual:    o.Accrual,
+				UploadedAt: o.UploadedAt.Format(time.RFC3339),
+			}) {
+				return
+			}
+		}
+	}, nil
 }

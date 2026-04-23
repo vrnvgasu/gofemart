@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/gin-gonic/gin"
 
@@ -38,11 +39,11 @@ func (h *Handler) SaveWithdraw(c *gin.Context) {
 func (h *Handler) GetWithdrawals(c *gin.Context) {
 	userID := middleware.UserIDFromCtx(c)
 
-	resp, err := h.app.GetWithdrawals(c, userID)
+	seq, err := h.app.GetWithdrawals(c, userID)
 	if err != nil {
 		response.ResponseError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, slices.Collect(seq))
 }

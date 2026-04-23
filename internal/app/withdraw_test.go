@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"slices"
 	"testing"
 	"time"
 
@@ -131,9 +132,13 @@ func TestGetWithdrawals(t *testing.T) {
 			a := App{
 				storage: tt.storage(mockrepository.NewMockStorage(ctrl)),
 			}
-			res, err := a.GetWithdrawals(t.Context(), 1)
+			seq, err := a.GetWithdrawals(t.Context(), 1)
 			tt.expectedErr(t, err)
-			require.Equal(t, tt.expected, res)
+			var got []WithdrawalResponse
+			if seq != nil {
+				got = slices.Collect(seq)
+			}
+			require.Equal(t, tt.expected, got)
 		})
 	}
 }
